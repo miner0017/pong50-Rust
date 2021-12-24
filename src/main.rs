@@ -8,9 +8,14 @@ fn main() {
         .run();
 }
 
-fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-        // 2d camera
+fn setup(
+    mut commands: Commands,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+    asset_server: Res<AssetServer>) {
+        // 2D camera
         commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+
+        // 2D Text 
         commands.spawn_bundle(Text2dBundle {
             text: Text::with_section(
                 "Hello, World!",
@@ -24,6 +29,18 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
                     horizontal: HorizontalAlign::Center,
                 },
             ),
+            ..Default::default()
+        });
+
+        // Left Paddle
+
+        // Right Paddle
+
+        // Ball
+        commands.spawn_bundle(SpriteBundle {
+            material: materials.add(Color::rgb(1.0, 0.5, 0.5).into()),
+            transform: Transform::from_xyz(0.0, 0.0, 1.0),
+            sprite: Sprite::new(Vec2::new(30.0, 30.0)),
             ..Default::default()
         });
 }
