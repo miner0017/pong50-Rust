@@ -1,9 +1,10 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, input::system::exit_on_esc_system};
 
 fn main() {
     App::build()
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup.system())
+        .add_system(exit_on_esc_system.system())
         .run();
 }
 
