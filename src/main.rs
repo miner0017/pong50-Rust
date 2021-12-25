@@ -62,8 +62,20 @@ fn setup(
             });
 
         // Left Paddle
+        commands.spawn_bundle(SpriteBundle {
+            material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
+            transform: Transform::from_xyz(0.0 - window.width() / 2.0 + 20.0, 0.0, 10.0),
+            sprite: Sprite::new(Vec2::new(30.0, 120.0)),
+            ..Default::default()
+        });
 
         // Right Paddle
+        commands.spawn_bundle(SpriteBundle {
+            material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
+            transform: Transform::from_xyz(0.0 + window.width() / 2.0 - 20.0, 0.0, 10.0),
+            sprite: Sprite::new(Vec2::new(30.0, 120.0)),
+            ..Default::default()
+        });
 
         // Ball
         commands.spawn_bundle(SpriteBundle {
