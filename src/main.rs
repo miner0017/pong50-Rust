@@ -43,33 +43,89 @@ fn setup(
         commands.spawn_bundle(UiCameraBundle::default());
 
         // 2D UI Text
-        // Text with one section
+        // Hello, Pong Text, will be updated with current Game State in the future...
         commands
-            .spawn_bundle(TextBundle {
-                style: Style {
-                    align_self: AlignSelf::FlexEnd,
-                    position_type: PositionType::Absolute,
-                    position: Rect {
-                        top: Val::Px(0.0),
-                        left: Val::Px(window.width() / 2.0 - 80.0),
-                        ..Default::default()
-                    },
+        .spawn_bundle(TextBundle {
+            style: Style {
+                align_self: AlignSelf::FlexEnd,
+                position_type: PositionType::Absolute,
+                position: Rect {
+                    top: Val::Px(0.0),
+                    left: Val::Px(window.width() / 2.0 - 80.0),
                     ..Default::default()
                 },
-                text: Text::with_section(
-                    "Hello, Pong!",
-                    TextStyle {
-                        font: asset_server.load("fonts/font.ttf"),
-                        font_size: 25.0,
-                        color: Color::WHITE,
-                    },
-                    TextAlignment {
-                        horizontal: HorizontalAlign::Center,
-                        ..Default::default()
-                    },
-                ),
                 ..Default::default()
-            });
+            },
+            text: Text::with_section(
+                "Hello, Pong!",
+                TextStyle {
+                    font: asset_server.load("fonts/font.ttf"),
+                    font_size: 25.0,
+                    color: Color::WHITE,
+                },
+                TextAlignment {
+                    horizontal: HorizontalAlign::Center,
+                    ..Default::default()
+                },
+            ),
+            ..Default::default()
+        });
+
+        // Player1 Score Text
+        commands
+        .spawn_bundle(TextBundle {
+            style: Style {
+                align_self: AlignSelf::FlexEnd,
+                position_type: PositionType::Absolute,
+                position: Rect {
+                    bottom: Val::Px(window.height() / 2.0 - 40.0),
+                    left: Val::Px(window.width() / 2.0 - 80.0),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            text: Text::with_section(
+                "0",
+                TextStyle {
+                    font: asset_server.load("fonts/font.ttf"),
+                    font_size: 80.0,
+                    color: Color::WHITE,
+                },
+                TextAlignment {
+                    horizontal: HorizontalAlign::Center,
+                    ..Default::default()
+                },
+            ),
+            ..Default::default()
+        });
+
+        // Player2 Score Text
+        commands
+        .spawn_bundle(TextBundle {
+            style: Style {
+                align_self: AlignSelf::FlexEnd,
+                position_type: PositionType::Absolute,
+                position: Rect {
+                    bottom: Val::Px(window.height() / 2.0 - 40.0),
+                    left: Val::Px(window.width() / 2.0 + 40.0),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            text: Text::with_section(
+                "0",
+                TextStyle {
+                    font: asset_server.load("fonts/font.ttf"),
+                    font_size: 80.0,
+                    color: Color::WHITE,
+                },
+                TextAlignment {
+                    horizontal: HorizontalAlign::Center,
+                    ..Default::default()
+                },
+            ),
+            ..Default::default()
+        });
 
         // Left Paddle
         commands.spawn_bundle(SpriteBundle {
