@@ -131,7 +131,7 @@ fn setup(
         commands.spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
             transform: Transform::from_xyz(0.0 - window.width() / 2.0 + 20.0, 0.0, 10.0),
-            sprite: Sprite::new(Vec2::new(30.0, 120.0)),
+            sprite: Sprite::new(Vec2::new(20.0, 100.0)),
             ..Default::default()
         })
         .insert(Paddle { player: Player::Player1 });
@@ -140,7 +140,7 @@ fn setup(
         commands.spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
             transform: Transform::from_xyz(0.0 + window.width() / 2.0 - 20.0, 0.0, 10.0),
-            sprite: Sprite::new(Vec2::new(30.0, 120.0)),
+            sprite: Sprite::new(Vec2::new(20.0, 100.0)),
             ..Default::default()
         })
         .insert(Paddle { player: Player::Player2 });
