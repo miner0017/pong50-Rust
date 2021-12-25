@@ -1,5 +1,16 @@
 use bevy::{prelude::*, input::system::exit_on_esc_system};
 
+const SPEED: f32 = 500.0; 
+
+enum Player {
+    Player1,
+    Player2,
+}
+
+struct Paddle {
+    player: Player,
+}
+
 fn main() {
     App::build()
         .insert_resource(WindowDescriptor {
@@ -12,6 +23,7 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup.system())
         .add_system(exit_on_esc_system.system())
+        .add_system(paddle_movement.system())
         .run();
 }
 
@@ -67,7 +79,8 @@ fn setup(
             transform: Transform::from_xyz(0.0 - window.width() / 2.0 + 20.0, 0.0, 10.0),
             sprite: Sprite::new(Vec2::new(30.0, 120.0)),
             ..Default::default()
-        });
+        })
+        .insert(Paddle { player: Player::Player1 });
 
         // Right Paddle
         commands.spawn_bundle(SpriteBundle {
@@ -75,7 +88,8 @@ fn setup(
             transform: Transform::from_xyz(0.0 + window.width() / 2.0 - 20.0, 0.0, 10.0),
             sprite: Sprite::new(Vec2::new(30.0, 120.0)),
             ..Default::default()
-        });
+        })
+        .insert(Paddle { player: Player::Player2 });
 
         // Ball
         commands.spawn_bundle(SpriteBundle {
@@ -84,4 +98,34 @@ fn setup(
             sprite: Sprite::new(Vec2::new(15.0, 15.0)),
             ..Default::default()
         });
+}
+
+fn paddle_movement(
+    input: Res<Input<KeyCode>>,
+    time: Res<Time>,
+    mut query: Query<(&Paddle, &mut Transform)>
+) {
+    for (paddle, mut transform) in query.iter_mut() {
+
+        let mut direction: f32 = 0.0;
+        match paddle.player {
+            Player::Player1 => {
+                if input.pressed(KeyCode::W) {
+                    direction = 1.0
+                } else if input.pressed(KeyCode::S) {
+                    direction = -1.0
+                }
+            }
+            Player::Player2 => {
+                if input.pressed(KeyCode::Up) {
+                    direction = 1.0
+                } else if input.pressed(KeyCode::Down) {
+                    direction = -1.0
+                }
+            }
+        }
+
+        transform.translation.y += direction * SPEED * time.delta_seconds();
+
+    }
 }
