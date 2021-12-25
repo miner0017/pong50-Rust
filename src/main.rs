@@ -2,6 +2,13 @@ use bevy::{prelude::*, input::system::exit_on_esc_system};
 
 fn main() {
     App::build()
+        .insert_resource(WindowDescriptor {
+            title: "Pong50".to_string(),
+            width: 1080.0,
+            height: 720.0,
+            resizable: false,
+            ..Default::default()
+        })
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup.system())
         .add_system(exit_on_esc_system.system())
@@ -11,7 +18,12 @@ fn main() {
 fn setup(
     mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
-    asset_server: Res<AssetServer>) {
+    mut windows: ResMut<Windows>,
+    asset_server: Res<AssetServer>
+) {
+        // Get the window
+        let window = windows.get_primary_mut().unwrap();
+
         // 2D camera
         commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
@@ -23,10 +35,10 @@ fn setup(
             .spawn_bundle(TextBundle {
                 style: Style {
                     align_self: AlignSelf::FlexEnd,
-                    position_type: PositionType::Relative,
+                    position_type: PositionType::Absolute,
                     position: Rect {
                         top: Val::Px(0.0),
-                        right: Val::Px(0.0),
+                        left: Val::Px(window.width() / 2.0 - 80.0),
                         ..Default::default()
                     },
                     ..Default::default()
