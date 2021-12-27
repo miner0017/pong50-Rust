@@ -4,13 +4,25 @@ const SPEED: f32 = 500.0;
 const PADDLE_SCALE_X: f32 = 20.0;
 const PADDLE_SCALE_Y: f32 = 100.0;
 
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
+enum AppState {
+    Play,
+    Start,
+}
+
 enum Player {
     Player1,
     Player2,
 }
 
+struct GameStateText;
+
 struct Paddle {
     player: Player,
+}
+
+struct Ball {
+    velocity: Vec2,
 }
 
 fn main() {
@@ -23,9 +35,15 @@ fn main() {
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
+        .add_state(AppState::Start)
         .add_startup_system(setup.system())
         .add_system(exit_on_esc_system.system())
         .add_system(paddle_movement.system())
+        .add_system(change_state_using_enter_key.system())
+        .add_system_set(
+            SystemSet::on_enter(AppState::Start)
+                .with_system(enter_start_state.system())
+        )
         .run();
 }
 
@@ -45,7 +63,7 @@ fn setup(
         commands.spawn_bundle(UiCameraBundle::default());
 
         // 2D UI Text
-        // Hello, Pong Text, will be updated with current Game State in the future...
+        // Shows our current Game State
         commands
         .spawn_bundle(TextBundle {
             style: Style {
@@ -59,7 +77,7 @@ fn setup(
                 ..Default::default()
             },
             text: Text::with_section(
-                "Hello, Pong!",
+                "Pong, Start!",
                 TextStyle {
                     font: asset_server.load("fonts/font.ttf"),
                     font_size: 25.0,
@@ -71,7 +89,8 @@ fn setup(
                 },
             ),
             ..Default::default()
-        });
+        })
+        .insert(GameStateText);
 
         // Player1 Score Text
         commands
@@ -153,7 +172,8 @@ fn setup(
             transform: Transform::from_xyz(0.0, 0.0, 1.0),
             sprite: Sprite::new(Vec2::new(15.0, 15.0)),
             ..Default::default()
-        });
+        })
+        .insert( Ball{ velocity: Vec2::new(0.0, 0.0) });
 }
 
 fn paddle_movement(
@@ -200,5 +220,26 @@ fn paddle_movement(
         // Apply our transformation
         transform.translation.y = y_translation;
 
+    }
+}
+
+fn enter_start_state(mut query: Query<&mut Transform, With<Ball>>) {
+    for mut transform in query.single_mut() {
+        transform.translation.x = 0.0;
+        transform.translation.y = 0.0;
+    }
+}
+
+fn change_state_using_enter_key(
+    mut keys: ResMut<Input<KeyCode>>,
+    mut app_state: ResMut<State<AppState>>
+) {
+    if keys.just_pressed(KeyCode::Return) {
+
+        match app_state.current() {
+            AppState::Play => app_state.set(AppState::Start).unwrap(),
+            AppState::Start => app_state.set(AppState::Play).unwrap(),
+        }
+        keys.reset(KeyCode::Return);
     }
 }
