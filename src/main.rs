@@ -1,6 +1,8 @@
 use bevy::{prelude::*, input::system::exit_on_esc_system};
 
-const SPEED: f32 = 500.0; 
+const SPEED: f32 = 500.0;
+const PADDLE_SCALE_X: f32 = 20.0;
+const PADDLE_SCALE_Y: f32 = 100.0;
 
 enum Player {
     Player1,
@@ -131,7 +133,7 @@ fn setup(
         commands.spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
             transform: Transform::from_xyz(0.0 - window.width() / 2.0 + 20.0, 0.0, 10.0),
-            sprite: Sprite::new(Vec2::new(20.0, 100.0)),
+            sprite: Sprite::new(Vec2::new(PADDLE_SCALE_X, PADDLE_SCALE_Y)),
             ..Default::default()
         })
         .insert(Paddle { player: Player::Player1 });
@@ -140,7 +142,7 @@ fn setup(
         commands.spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
             transform: Transform::from_xyz(0.0 + window.width() / 2.0 - 20.0, 0.0, 10.0),
-            sprite: Sprite::new(Vec2::new(20.0, 100.0)),
+            sprite: Sprite::new(Vec2::new(PADDLE_SCALE_X, PADDLE_SCALE_Y)),
             ..Default::default()
         })
         .insert(Paddle { player: Player::Player2 });
@@ -157,10 +159,14 @@ fn setup(
 fn paddle_movement(
     input: Res<Input<KeyCode>>,
     time: Res<Time>,
+    windows: Res<Windows>,
     mut query: Query<(&Paddle, &mut Transform)>
 ) {
+    let window = windows.get_primary().unwrap();
+
     for (paddle, mut transform) in query.iter_mut() {
 
+        // Get Paddles movement direction based on key pressed.
         let mut direction: f32 = 0.0;
 
         match paddle.player {
@@ -179,8 +185,20 @@ fn paddle_movement(
                 }
             }
         }
+        
+        // Clamp our Paddles within the top and bottom of the screen
+        let mut y_translation = transform.translation.y + direction * SPEED * time.delta_seconds();
+        let max_height = window.height() / 2.0 - PADDLE_SCALE_Y / 2.0;
+        let min_height = -window.height() / 2.0 + PADDLE_SCALE_Y / 2.0;
 
-        transform.translation.y += direction * SPEED * time.delta_seconds();
+        if y_translation > max_height {
+            y_translation = max_height;
+        } else if y_translation < min_height {
+            y_translation = min_height;
+        }
+
+        // Apply our transformation
+        transform.translation.y = y_translation;
 
     }
 }
