@@ -40,10 +40,8 @@ fn main() {
         .add_system(exit_on_esc_system.system())
         .add_system(paddle_movement.system())
         .add_system(change_state_using_enter_key.system())
-        .add_system_set(
-            SystemSet::on_enter(AppState::Start)
-                .with_system(enter_start_state.system())
-        )
+        .add_system(update_game_state_text.system())
+        .add_system_set(SystemSet::on_enter(AppState::Start).with_system(enter_start_state.system()))
         .run();
 }
 
@@ -223,15 +221,15 @@ fn paddle_movement(
     }
 }
 
-fn enter_start_state(mut query: Query<&mut Transform, With<Ball>>) {
-    for mut transform in query.single_mut() {
+fn enter_start_state(mut query: Query<&mut Transform, With<Ball>>) { 
+    if let Ok(mut transform) = query.single_mut() {
         transform.translation.x = 0.0;
         transform.translation.y = 0.0;
     }
 }
 
 fn change_state_using_enter_key(
-    mut keys: ResMut<Input<KeyCode>>,
+    keys: Res<Input<KeyCode>>,
     mut app_state: ResMut<State<AppState>>
 ) {
     if keys.just_pressed(KeyCode::Return) {
@@ -240,6 +238,11 @@ fn change_state_using_enter_key(
             AppState::Play => app_state.set(AppState::Start).unwrap(),
             AppState::Start => app_state.set(AppState::Play).unwrap(),
         }
-        keys.reset(KeyCode::Return);
+    }
+}
+
+fn update_game_state_text(app_state: Res<State<AppState>>, mut query: Query<&mut Text, With<GameStateText>>) {
+    if let Ok(mut text) = query.single_mut() {
+        text.sections[0].value = format!("Pong, {:?}!", app_state.current());
     }
 }
