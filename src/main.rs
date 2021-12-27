@@ -42,6 +42,7 @@ fn main() {
         .add_system(change_state_using_enter_key.system())
         .add_system(update_game_state_text.system())
         .add_system_set(SystemSet::on_enter(AppState::Start).with_system(enter_start_state.system()))
+        .add_system_set(SystemSet::on_update(AppState::Play).with_system(ball_movement.system()))
         .run();
 }
 
@@ -171,7 +172,7 @@ fn setup(
             sprite: Sprite::new(Vec2::new(15.0, 15.0)),
             ..Default::default()
         })
-        .insert( Ball{ velocity: Vec2::new(0.0, 0.0) });
+        .insert( Ball{ velocity: Vec2::new(100.0, 100.0) });
 }
 
 fn paddle_movement(
@@ -218,6 +219,13 @@ fn paddle_movement(
         // Apply our transformation
         transform.translation.y = y_translation;
 
+    }
+}
+
+fn ball_movement(time: Res<Time>, mut query: Query<(&Ball, &mut Transform)>) {
+    if let Ok((ball, mut transform)) = query.single_mut() {
+        transform.translation.x += ball.velocity.x * time.delta_seconds();
+        transform.translation.y += ball.velocity.y * time.delta_seconds();
     }
 }
 
