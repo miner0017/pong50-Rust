@@ -1,8 +1,13 @@
 use bevy::{prelude::*, input::system::exit_on_esc_system};
+use rand::{thread_rng, Rng};
 
 const SPEED: f32 = 500.0;
 const PADDLE_SCALE_X: f32 = 20.0;
 const PADDLE_SCALE_Y: f32 = 100.0;
+const BALL_INITIAL_X_MIN: f32 = 140.0;
+const BALL_INITIAL_X_MAX: f32 = 200.0;
+const BALL_INITIAL_Y_MIN: f32 = -50.0;
+const BALL_INITIAL_Y_MAX: f32 = 50.0;
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 enum AppState {
@@ -172,7 +177,7 @@ fn setup(
             sprite: Sprite::new(Vec2::new(15.0, 15.0)),
             ..Default::default()
         })
-        .insert( Ball{ velocity: Vec2::new(100.0, 100.0) });
+        .insert( Ball{ velocity: Vec2::new(0.0,0.0) });
 }
 
 fn paddle_movement(
@@ -229,11 +234,22 @@ fn ball_movement(time: Res<Time>, mut query: Query<(&Ball, &mut Transform)>) {
     }
 }
 
-fn enter_start_state(mut query: Query<&mut Transform, With<Ball>>) { 
-    if let Ok(mut transform) = query.single_mut() {
+fn enter_start_state(mut query: Query<(&mut Transform, &mut Ball)>) {
+    if let Ok((mut transform, mut ball)) = query.single_mut() {
+        // reset ball position to 0.0
         transform.translation.x = 0.0;
         transform.translation.y = 0.0;
+
+        // randomize ball velocity
+        let mut rng = thread_rng();
+        let ball_x = rng.gen_range(BALL_INITIAL_X_MIN..BALL_INITIAL_X_MAX);
+        let ball_y = rng.gen_range(BALL_INITIAL_Y_MIN..BALL_INITIAL_Y_MAX);
+
+        ball.velocity.x = ball_x;
+        ball.velocity.y = ball_y;
     }
+
+
 }
 
 fn change_state_using_enter_key(
