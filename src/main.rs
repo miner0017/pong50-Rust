@@ -1,9 +1,10 @@
 use bevy::{prelude::*, input::system::exit_on_esc_system};
 use rand::{thread_rng, Rng};
 
-const SPEED: f32 = 500.0;
-const PADDLE_SCALE_X: f32 = 20.0;
-const PADDLE_SCALE_Y: f32 = 100.0;
+mod paddle;
+
+use paddle::PaddlePlugin;
+
 const BALL_INITIAL_X_MIN: f32 = 140.0;
 const BALL_INITIAL_X_MAX: f32 = 200.0;
 const BALL_INITIAL_Y_MIN: f32 = -50.0;
@@ -22,10 +23,6 @@ enum Player {
 
 struct GameStateText;
 
-struct Paddle {
-    player: Player,
-}
-
 struct Ball {
     velocity: Vec2,
 }
@@ -40,10 +37,10 @@ fn main() {
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
+        .add_plugin(PaddlePlugin)
         .add_state(AppState::Start)
         .add_startup_system(setup.system())
         .add_system(exit_on_esc_system.system())
-        .add_system(paddle_movement.system())
         .add_system(change_state_using_enter_key.system())
         .add_system(update_game_state_text.system())
         .add_system_set(SystemSet::on_enter(AppState::Start).with_system(enter_start_state.system()))
@@ -152,24 +149,6 @@ fn setup(
             ..Default::default()
         });
 
-        // Left Paddle
-        commands.spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
-            transform: Transform::from_xyz(0.0 - window.width() / 2.0 + 20.0, 0.0, 10.0),
-            sprite: Sprite::new(Vec2::new(PADDLE_SCALE_X, PADDLE_SCALE_Y)),
-            ..Default::default()
-        })
-        .insert(Paddle { player: Player::Player1 });
-
-        // Right Paddle
-        commands.spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(1.0, 1.0, 1.0).into()),
-            transform: Transform::from_xyz(0.0 + window.width() / 2.0 - 20.0, 0.0, 10.0),
-            sprite: Sprite::new(Vec2::new(PADDLE_SCALE_X, PADDLE_SCALE_Y)),
-            ..Default::default()
-        })
-        .insert(Paddle { player: Player::Player2 });
-
         // Ball
         commands.spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(1.0, 0.5, 0.5).into()),
@@ -178,53 +157,6 @@ fn setup(
             ..Default::default()
         })
         .insert( Ball{ velocity: Vec2::new(0.0,0.0) });
-}
-
-fn paddle_movement(
-    input: Res<Input<KeyCode>>,
-    time: Res<Time>,
-    windows: Res<Windows>,
-    mut query: Query<(&Paddle, &mut Transform)>
-) {
-    let window = windows.get_primary().unwrap();
-
-    for (paddle, mut transform) in query.iter_mut() {
-
-        // Get Paddles movement direction based on key pressed.
-        let mut direction: f32 = 0.0;
-
-        match paddle.player {
-            Player::Player1 => {
-                if input.pressed(KeyCode::W) {
-                    direction = 1.0
-                } else if input.pressed(KeyCode::S) {
-                    direction = -1.0
-                }
-            }
-            Player::Player2 => {
-                if input.pressed(KeyCode::Up) {
-                    direction = 1.0
-                } else if input.pressed(KeyCode::Down) {
-                    direction = -1.0
-                }
-            }
-        }
-        
-        // Clamp our Paddles within the top and bottom of the screen
-        let mut y_translation = transform.translation.y + direction * SPEED * time.delta_seconds();
-        let max_height = window.height() / 2.0 - PADDLE_SCALE_Y / 2.0;
-        let min_height = -window.height() / 2.0 + PADDLE_SCALE_Y / 2.0;
-
-        if y_translation > max_height {
-            y_translation = max_height;
-        } else if y_translation < min_height {
-            y_translation = min_height;
-        }
-
-        // Apply our transformation
-        transform.translation.y = y_translation;
-
-    }
 }
 
 fn ball_movement(time: Res<Time>, mut query: Query<(&Ball, &mut Transform)>) {
