@@ -2,13 +2,10 @@ use bevy::{prelude::*, input::system::exit_on_esc_system};
 use rand::{thread_rng, Rng};
 
 mod paddle;
+mod ball;
 
 use paddle::PaddlePlugin;
-
-const BALL_INITIAL_X_MIN: f32 = 140.0;
-const BALL_INITIAL_X_MAX: f32 = 200.0;
-const BALL_INITIAL_Y_MIN: f32 = -50.0;
-const BALL_INITIAL_Y_MAX: f32 = 50.0;
+use ball::{BallPlugin, Ball, BALL_INITIAL_X_MIN, BALL_INITIAL_X_MAX, BALL_INITIAL_Y_MAX, BALL_INITIAL_Y_MIN};
 
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 enum AppState {
@@ -23,10 +20,6 @@ enum Player {
 
 struct GameStateText;
 
-struct Ball {
-    velocity: Vec2,
-}
-
 fn main() {
     App::build()
         .insert_resource(WindowDescriptor {
@@ -38,19 +31,18 @@ fn main() {
         })
         .add_plugins(DefaultPlugins)
         .add_plugin(PaddlePlugin)
+        .add_plugin(BallPlugin)
         .add_state(AppState::Start)
         .add_startup_system(setup.system())
         .add_system(exit_on_esc_system.system())
         .add_system(change_state_using_enter_key.system())
         .add_system(update_game_state_text.system())
         .add_system_set(SystemSet::on_enter(AppState::Start).with_system(enter_start_state.system()))
-        .add_system_set(SystemSet::on_update(AppState::Play).with_system(ball_movement.system()))
         .run();
 }
 
 fn setup(
     mut commands: Commands,
-    mut materials: ResMut<Assets<ColorMaterial>>,
     mut windows: ResMut<Windows>,
     asset_server: Res<AssetServer>
 ) {
@@ -148,22 +140,6 @@ fn setup(
             ),
             ..Default::default()
         });
-
-        // Ball
-        commands.spawn_bundle(SpriteBundle {
-            material: materials.add(Color::rgb(1.0, 0.5, 0.5).into()),
-            transform: Transform::from_xyz(0.0, 0.0, 1.0),
-            sprite: Sprite::new(Vec2::new(15.0, 15.0)),
-            ..Default::default()
-        })
-        .insert( Ball{ velocity: Vec2::new(0.0,0.0) });
-}
-
-fn ball_movement(time: Res<Time>, mut query: Query<(&Ball, &mut Transform)>) {
-    if let Ok((ball, mut transform)) = query.single_mut() {
-        transform.translation.x += ball.velocity.x * time.delta_seconds();
-        transform.translation.y += ball.velocity.y * time.delta_seconds();
-    }
 }
 
 fn enter_start_state(mut query: Query<(&mut Transform, &mut Ball)>) {
