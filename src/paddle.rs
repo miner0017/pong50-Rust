@@ -9,6 +9,10 @@ const PADDLE_SCALE_Y: f32 = 100.0;
 
 pub struct PaddlePlugin;
 
+struct Paddle {
+    player: Player,
+}
+
 impl Plugin for PaddlePlugin {
     fn build(&self, app: &mut AppBuilder) {
         app
@@ -17,9 +21,6 @@ impl Plugin for PaddlePlugin {
     }
 }
 
-struct Paddle {
-    player: Player,
-}
 
 fn setup(
     mut commands: Commands,
