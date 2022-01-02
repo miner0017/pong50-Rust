@@ -1,4 +1,4 @@
-use bevy::{prelude::*, sprite::collide_aabb::{collide, Collision}};
+use bevy::{prelude::*, sprite::collide_aabb::collide};
 
 use crate::{AppState, paddle::{Paddle, PADDLE_SCALE_Y, PADDLE_SCALE_X}, Player};
 
