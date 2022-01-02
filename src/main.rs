@@ -15,6 +15,8 @@ pub enum Player {
     Player2,
 }
 
+struct Server(Player);
+
 struct FPSText;
 
 fn main() {
@@ -26,6 +28,7 @@ fn main() {
             resizable: false,
             ..Default::default()
         })
+        .insert_resource(Server(Player::Player1))
         .add_plugins(DefaultPlugins)
         .add_plugin(PaddlePlugin)
         .add_plugin(BallPlugin)
