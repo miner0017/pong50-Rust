@@ -65,7 +65,8 @@ fn setup(
 
 fn enter_start_state(
     mut query: Query<(&mut Transform, &mut Ball)>,
-    mut scoreboard: ResMut<Scoreboard> 
+    mut scoreboard: ResMut<Scoreboard>,
+    server: Res<Server>
 ) {
     if let Ok((mut transform, mut ball)) = query.single_mut() {
         // reset scores to 0
@@ -77,9 +78,17 @@ fn enter_start_state(
         transform.translation.y = 0.0;
 
 
-        // randomize ball velocity serving towards player2
+        let mut serve = 1.0;
+
+        match server.0 {
+            Player::Player2 => serve = -1.0,
+            _ => (),
+        }
+
+
+        // randomize ball velocity with relation to server
         let mut rng = thread_rng();
-        let ball_x = rng.gen_range(BALL_INITIAL_X_MIN..BALL_INITIAL_X_MAX);
+        let ball_x = serve * rng.gen_range(BALL_INITIAL_X_MIN..BALL_INITIAL_X_MAX);
         let ball_y = rng.gen_range(BALL_INITIAL_Y_MIN..BALL_INITIAL_Y_MAX);
 
         ball.velocity.x = ball_x;
