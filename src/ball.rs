@@ -1,6 +1,6 @@
 use bevy::{prelude::*, sprite::collide_aabb::collide};
 
-use crate::{AppState, paddle::{Paddle, PADDLE_SCALE_Y, PADDLE_SCALE_X}, Player};
+use crate::{game_state::AppState, paddle::{Paddle, PADDLE_SCALE_Y, PADDLE_SCALE_X}, Player};
 
 pub const BALL_INITIAL_X_MIN: f32 = 140.0;
 pub const BALL_INITIAL_X_MAX: f32 = 200.0;

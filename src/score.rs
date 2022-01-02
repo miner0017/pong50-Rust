@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{Player, AppState, ball::Ball};
+use crate::{Player, game_state::AppState, ball::Ball};
 pub struct ScorePlugin;
 
 struct Scoreboard {
