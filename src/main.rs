@@ -140,6 +140,63 @@ fn setup(
             ),
             ..Default::default()
         });
+
+        // FPS Text
+        commands
+        .spawn_bundle(TextBundle {
+            style: Style {
+                align_self: AlignSelf::FlexEnd,
+                position_type: PositionType::Absolute,
+                position: Rect {
+                    top: Val::Px(5.0),
+                    left: Val::Px(15.0),
+                    ..Default::default()
+                },
+                ..Default::default()
+            },
+            text: Text {
+                sections: vec![
+                    TextSection {
+                        value: "".to_string(),
+                        style: TextStyle {
+                            font: asset_server.load("fonts/font.ttf"),
+                            font_size: 30.0,
+                            color: Color::ORANGE_RED,
+                        },
+                        
+                    },
+                    TextSection {
+                        value: " fps, ".to_string(),
+                        style: TextStyle {
+                            font: asset_server.load("fonts/font.ttf"),
+                            font_size: 30.0,
+                            color: Color::YELLOW,
+                        },
+                        
+                    },
+                    TextSection {
+                        value: "".to_string(),
+                        style: TextStyle {
+                            font: asset_server.load("fonts/font.ttf"),
+                            font_size: 30.0,
+                            color: Color::GREEN,
+                        },
+                        
+                    },
+                    TextSection {
+                        value: " ms/frame".to_string(),
+                        style: TextStyle {
+                            font: asset_server.load("fonts/font.ttf"),
+                            font_size: 30.0,
+                            color: Color::BLUE,
+                        },
+                        
+                    },
+                ],
+                alignment: Default::default(),
+            },
+            ..Default::default()
+        });
 }
 
 fn enter_start_state(mut query: Query<(&mut Transform, &mut Ball)>) {
