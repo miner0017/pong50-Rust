@@ -97,7 +97,7 @@ fn setup(
 
     commands.insert_resource( LoadedAudio{
         paddle_hit: asset_server.load("sounds/paddle_hit.wav"),
-        score: asset_server.load("sounds/score.wave"),
+        score: asset_server.load("sounds/score.wav"),
         wall_hit: asset_server.load("sounds/wall_hit.wav"),
     })
 }
