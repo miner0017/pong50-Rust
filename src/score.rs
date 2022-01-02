@@ -1,6 +1,9 @@
 use bevy::prelude::*;
 
 use crate::{Player, game_state::AppState, ball::Ball, Server};
+
+const VICTORY_SCORE: u32 = 2;
+
 pub struct ScorePlugin;
 
 pub struct Scoreboard {
@@ -108,20 +111,30 @@ fn scored(
     mut scoreboard: ResMut<Scoreboard>,
     mut app_state: ResMut<State<AppState>>,
     mut server: ResMut<Server>,
-    query: Query<&Transform, With<Ball>>,
+    mut query: Query<&mut Transform, With<Ball>>,
     windows: Res<Windows>
 ) {
     let window = windows.get_primary().unwrap();
 
-    for transform in query.iter() {
+    for mut transform in query.iter_mut() {
         if transform.translation.x > window.width() / 2.0 {
             scoreboard.player1 += 1;
             server.0 = Player::Player2;
-            app_state.set(AppState::Serve).unwrap();
+            if scoreboard.player1 >= VICTORY_SCORE {
+                transform.translation.x += window.width();
+                app_state.set(AppState::Done).unwrap();
+            } else {
+                app_state.set(AppState::Serve).unwrap();
+            }
         } else if transform.translation.x < -window.width() / 2.0 {
             scoreboard.player2 += 1;
             server.0 = Player::Player1;
-            app_state.set(AppState::Serve).unwrap();
+            if scoreboard.player2 >= VICTORY_SCORE {
+                transform.translation.x += window.width();
+                app_state.set(AppState::Done).unwrap();
+            } else {
+                app_state.set(AppState::Serve).unwrap();
+            }
         }
     }
 }
