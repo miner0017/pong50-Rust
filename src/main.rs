@@ -17,6 +17,12 @@ pub enum Player {
 
 struct Server(Player);
 
+pub struct LoadedAudio {
+    paddle_hit: Handle<AudioSource>,
+    score: Handle<AudioSource>,
+    wall_hit: Handle<AudioSource>
+}
+
 struct FPSText;
 
 fn main() {
@@ -45,51 +51,55 @@ fn setup(
     mut commands: Commands,
     asset_server: Res<AssetServer>
 ) {
-        // 2D camera
-        commands.spawn_bundle(OrthographicCameraBundle::new_2d());
-
-        // UI camera
-        commands.spawn_bundle(UiCameraBundle::default());
-
-        // 2D UI Text
-        // FPS Text
-        commands
-        .spawn_bundle(TextBundle {
-            style: Style {
-                align_self: AlignSelf::FlexEnd,
-                position_type: PositionType::Absolute,
-                position: Rect {
-                    top: Val::Px(5.0),
-                    left: Val::Px(15.0),
-                    ..Default::default()
-                },
+    // 2D camera
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+    // UI camera
+    commands.spawn_bundle(UiCameraBundle::default());
+    // 2D UI Text
+    // FPS Text
+    commands
+    .spawn_bundle(TextBundle {
+        style: Style {
+            align_self: AlignSelf::FlexEnd,
+            position_type: PositionType::Absolute,
+            position: Rect {
+                top: Val::Px(5.0),
+                left: Val::Px(15.0),
                 ..Default::default()
             },
-            text: Text {
-                sections: vec![
-                    TextSection {
-                        value: "".to_string(),
-                        style: TextStyle {
-                            font: asset_server.load("fonts/font.ttf"),
-                            font_size: 15.0,
-                            color: Color::ORANGE_RED,
-                        },
-                        
-                    },
-                    TextSection {
-                        value: " fps".to_string(),
-                        style: TextStyle {
-                            font: asset_server.load("fonts/font.ttf"),
-                            font_size: 15.0,
-                            color: Color::YELLOW,
-                        },
-                        
-                    },
-                ],
-                alignment: Default::default(),
-            },
             ..Default::default()
-        }).insert(FPSText);
+        },
+        text: Text {
+            sections: vec![
+                TextSection {
+                    value: "".to_string(),
+                    style: TextStyle {
+                        font: asset_server.load("fonts/font.ttf"),
+                        font_size: 15.0,
+                        color: Color::ORANGE_RED,
+                    },
+                    
+                },
+                TextSection {
+                    value: " fps".to_string(),
+                    style: TextStyle {
+                        font: asset_server.load("fonts/font.ttf"),
+                        font_size: 15.0,
+                        color: Color::YELLOW,
+                    },
+                    
+                },
+            ],
+            alignment: Default::default(),
+        },
+        ..Default::default()
+    }).insert(FPSText);
+
+    commands.insert_resource( LoadedAudio{
+        paddle_hit: asset_server.load("sounds/paddle_hit.wav"),
+        score: asset_server.load("sounds/score.wave"),
+        wall_hit: asset_server.load("sounds/wall_hit.wav"),
+    })
 }
 
 fn update_fps_text(
