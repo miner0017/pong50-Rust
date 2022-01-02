@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 
-use crate::{Player, game_state::AppState, ball::Ball};
+use crate::{Player, game_state::AppState, ball::Ball, Server};
 pub struct ScorePlugin;
 
-struct Scoreboard {
-    player1: u32,
-    player2: u32,
+pub struct Scoreboard {
+    pub player1: u32,
+    pub player2: u32,
 }
 
 struct ScoreText(Player);
@@ -18,8 +18,8 @@ impl Plugin for ScorePlugin {
                 player2: 0,
             })
             .add_startup_system(setup.system())
-            .add_system(scored.system())
-            .add_system(update_scoreboard.system());
+            .add_system(update_scoreboard.system())
+            .add_system_set(SystemSet::on_update(AppState::Play).with_system(scored.system()));
     }
 }
 
@@ -107,6 +107,7 @@ fn update_scoreboard(
 fn scored(
     mut scoreboard: ResMut<Scoreboard>,
     mut app_state: ResMut<State<AppState>>,
+    mut server: ResMut<Server>,
     query: Query<&Transform, With<Ball>>,
     windows: Res<Windows>
 ) {
@@ -115,10 +116,12 @@ fn scored(
     for transform in query.iter() {
         if transform.translation.x > window.width() / 2.0 {
             scoreboard.player1 += 1;
-            app_state.set(AppState::Start).unwrap();
+            server.0 = Player::Player2;
+            app_state.set(AppState::Serve).unwrap();
         } else if transform.translation.x < -window.width() / 2.0 {
             scoreboard.player2 += 1;
-            app_state.set(AppState::Start).unwrap();
+            server.0 = Player::Player1;
+            app_state.set(AppState::Serve).unwrap();
         }
     }
 }
