@@ -1,4 +1,5 @@
 use bevy::{prelude::*, sprite::collide_aabb::collide};
+use rand::{thread_rng, Rng};
 
 use crate::{game_state::AppState, paddle::{Paddle, PADDLE_SCALE_Y, PADDLE_SCALE_X}, Player};
 
@@ -117,6 +118,12 @@ fn ball_collision(
             if collided_player_2 {
                 ball_transform.translation.x -= BALL_SCALE / 2.0;
                 ball.velocity.x = BOUNCE_VELOCITY_INCREASE * -ball.velocity.x;
+            }
+            if collided_player_1 || collided_player_2 {
+                // randomize ball y velocity
+                let mut rng = thread_rng();
+                let ball_y = rng.gen_range(BALL_INITIAL_Y_MIN..BALL_INITIAL_Y_MAX);
+                ball.velocity.y = if ball.velocity.y > 0.0 { ball_y } else { -ball_y };
             }
         }
     }
