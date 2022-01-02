@@ -1,4 +1,4 @@
-use bevy::{prelude::*, input::system::exit_on_esc_system};
+use bevy::{prelude::*, input::system::exit_on_esc_system, diagnostic::{FrameTimeDiagnosticsPlugin, Diagnostics}};
 use rand::{thread_rng, Rng};
 
 mod paddle;
@@ -19,6 +19,7 @@ enum Player {
 }
 
 struct GameStateText;
+struct FPSText;
 
 fn main() {
     App::build()
@@ -32,8 +33,10 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(PaddlePlugin)
         .add_plugin(BallPlugin)
+        .add_plugin(FrameTimeDiagnosticsPlugin)
         .add_state(AppState::Start)
         .add_startup_system(setup.system())
+        .add_system(update_fps_text.system())
         .add_system(exit_on_esc_system.system())
         .add_system(change_state_using_enter_key.system())
         .add_system(update_game_state_text.system())
@@ -160,35 +163,17 @@ fn setup(
                         value: "".to_string(),
                         style: TextStyle {
                             font: asset_server.load("fonts/font.ttf"),
-                            font_size: 30.0,
+                            font_size: 15.0,
                             color: Color::ORANGE_RED,
                         },
                         
                     },
                     TextSection {
-                        value: " fps, ".to_string(),
+                        value: " fps".to_string(),
                         style: TextStyle {
                             font: asset_server.load("fonts/font.ttf"),
-                            font_size: 30.0,
+                            font_size: 15.0,
                             color: Color::YELLOW,
-                        },
-                        
-                    },
-                    TextSection {
-                        value: "".to_string(),
-                        style: TextStyle {
-                            font: asset_server.load("fonts/font.ttf"),
-                            font_size: 30.0,
-                            color: Color::GREEN,
-                        },
-                        
-                    },
-                    TextSection {
-                        value: " ms/frame".to_string(),
-                        style: TextStyle {
-                            font: asset_server.load("fonts/font.ttf"),
-                            font_size: 30.0,
-                            color: Color::BLUE,
                         },
                         
                     },
@@ -196,7 +181,7 @@ fn setup(
                 alignment: Default::default(),
             },
             ..Default::default()
-        });
+        }).insert(FPSText);
 }
 
 fn enter_start_state(mut query: Query<(&mut Transform, &mut Ball)>) {
@@ -233,5 +218,21 @@ fn change_state_using_enter_key(
 fn update_game_state_text(app_state: Res<State<AppState>>, mut query: Query<&mut Text, With<GameStateText>>) {
     if let Ok(mut text) = query.single_mut() {
         text.sections[0].value = format!("Pong, {:?}!", app_state.current());
+    }
+}
+
+fn update_fps_text(
+    diagnostics: Res<Diagnostics>,
+    mut query: Query<&mut Text, With<FPSText>>
+) {
+    for mut text in query.iter_mut() {
+        let mut fps = 0.0;
+        if let Some(fps_diagnostic) = diagnostics.get(FrameTimeDiagnosticsPlugin::FPS) {
+            if let Some(fps_avg) = fps_diagnostic.average() {
+                fps = fps_avg;
+            }
+        }
+
+        text.sections[0].value = format!("{:.1}", fps);
     }
 }
