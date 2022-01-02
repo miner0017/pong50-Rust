@@ -10,6 +10,7 @@ pub enum AppState {
     Play,
     Start,
     Serve,
+    Done,
 }
 
 struct GameStateText;
@@ -134,15 +135,36 @@ fn change_state_using_enter_key(
     if keys.just_pressed(KeyCode::Return) {
 
         match app_state.current() {
-            AppState::Play => (),
             AppState::Start => app_state.set(AppState::Serve).unwrap(),
-            AppState::Serve => app_state.set(AppState::Play).unwrap()
+            AppState::Serve => app_state.set(AppState::Play).unwrap(),
+            AppState::Done => app_state.set(AppState::Start).unwrap(),
+            _ => (),
         }
     }
 }
 
-fn update_game_state_text(app_state: Res<State<AppState>>, mut query: Query<&mut Text, With<GameStateText>>) {
-    if let Ok(mut text) = query.single_mut() {
-        text.sections[0].value = format!("Pong, {:?}!", app_state.current());
+fn update_game_state_text(
+    app_state: Res<State<AppState>>, 
+    mut query: Query<&mut Text, With<GameStateText>>,
+    server: Res<Server>
+) {
+    match app_state.current() {
+        AppState::Done => {
+            if let Ok(mut text) = query.single_mut() {
+                match server.0 {
+                    Player::Player1 => {
+                        text.sections[0].value = format!("Player 2 Wins!");
+                    }
+                    Player::Player2 => {
+                        text.sections[0].value = format!("Player 1 Wins!");
+                    }
+                }
+            }
+        }
+        _ => {
+                if let Ok(mut text) = query.single_mut() {
+                text.sections[0].value = format!("Pong, {:?}!", app_state.current());
+            }
+        }
     }
 }
