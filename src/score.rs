@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::{Player, game_state::AppState, ball::Ball, Server};
+use crate::{Player, game_state::AppState, ball::Ball, Server, LoadedAudio};
 
 const VICTORY_SCORE: u32 = 2;
 
@@ -112,12 +112,15 @@ fn scored(
     mut app_state: ResMut<State<AppState>>,
     mut server: ResMut<Server>,
     mut query: Query<&mut Transform, With<Ball>>,
-    windows: Res<Windows>
+    windows: Res<Windows>,
+    audio: Res<Audio>,
+    loaded_audio: Res<LoadedAudio>,
 ) {
     let window = windows.get_primary().unwrap();
 
     for mut transform in query.iter_mut() {
         if transform.translation.x > window.width() / 2.0 {
+            audio.play(loaded_audio.score.clone());
             scoreboard.player1 += 1;
             server.0 = Player::Player2;
             if scoreboard.player1 >= VICTORY_SCORE {
@@ -127,6 +130,7 @@ fn scored(
                 app_state.set(AppState::Serve).unwrap();
             }
         } else if transform.translation.x < -window.width() / 2.0 {
+            audio.play(loaded_audio.score.clone());
             scoreboard.player2 += 1;
             server.0 = Player::Player1;
             if scoreboard.player2 >= VICTORY_SCORE {

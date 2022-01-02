@@ -1,7 +1,7 @@
 use bevy::{prelude::*, sprite::collide_aabb::collide};
 use rand::{thread_rng, Rng};
 
-use crate::{game_state::AppState, paddle::{Paddle, PADDLE_SCALE_Y, PADDLE_SCALE_X}, Player};
+use crate::{game_state::AppState, paddle::{Paddle, PADDLE_SCALE_Y, PADDLE_SCALE_X}, Player, LoadedAudio};
 
 pub const BALL_INITIAL_X_MIN: f32 = 140.0;
 pub const BALL_INITIAL_X_MAX: f32 = 200.0;
@@ -59,7 +59,9 @@ fn ball_collision(
         Query<(&mut Transform, &mut Ball)>,
         Query<(&Paddle, &Transform)>,
     )>,
-    windows: Res<Windows>
+    windows: Res<Windows>,
+    audio: Res<Audio>,
+    loaded_audio: Res<LoadedAudio>,
 ) {
 
     let mut ball_translation = Vec3::new(0.0, 0.0, 0.0);
@@ -105,9 +107,11 @@ fn ball_collision(
             let window = windows.get_primary().unwrap();
 
             if ball_transform.translation.y > window.height() / 2.0 - BALL_SCALE / 2.0 {
+                audio.play(loaded_audio.wall_hit.clone());
                 ball.velocity.y = -ball.velocity.y;
             }
             if ball_transform.translation.y < -window.height() / 2.0 + BALL_SCALE / 2.0 {
+                audio.play(loaded_audio.wall_hit.clone());
                 ball.velocity.y = -ball.velocity.y;
             }
 
@@ -124,6 +128,7 @@ fn ball_collision(
                 let mut rng = thread_rng();
                 let ball_y = rng.gen_range(BALL_INITIAL_Y_MIN..BALL_INITIAL_Y_MAX);
                 ball.velocity.y = if ball.velocity.y > 0.0 { ball_y } else { -ball_y };
+                audio.play(loaded_audio.paddle_hit.clone());
             }
         }
     }
