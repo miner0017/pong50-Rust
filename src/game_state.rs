@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use rand::{thread_rng, Rng};
 
-use crate::ball::{Ball, BALL_INITIAL_X_MAX, BALL_INITIAL_X_MIN, BALL_INITIAL_Y_MIN, BALL_INITIAL_Y_MAX};
+use crate::{ball::{Ball, BALL_INITIAL_X_MAX, BALL_INITIAL_X_MIN, BALL_INITIAL_Y_MIN, BALL_INITIAL_Y_MAX}, Server, Player, score::Scoreboard};
 
 pub struct GameStatePlugin;
 
@@ -9,6 +9,7 @@ pub struct GameStatePlugin;
 pub enum AppState {
     Play,
     Start,
+    Serve,
 }
 
 struct GameStateText;
@@ -20,7 +21,8 @@ impl Plugin for GameStatePlugin{
             .add_state(AppState::Start)
             .add_system(change_state_using_enter_key.system())
             .add_system(update_game_state_text.system())
-            .add_system_set(SystemSet::on_enter(AppState::Start).with_system(enter_start_state.system()));
+            .add_system_set(SystemSet::on_enter(AppState::Start).with_system(enter_start_state.system()))
+            .add_system_set(SystemSet::on_enter(AppState::Serve).with_system(enter_serve_state.system()));
     }
 }
 
@@ -61,15 +63,52 @@ fn setup(
     .insert(GameStateText);
 }
 
-fn enter_start_state(mut query: Query<(&mut Transform, &mut Ball)>) {
+fn enter_start_state(
+    mut query: Query<(&mut Transform, &mut Ball)>,
+    mut scoreboard: ResMut<Scoreboard> 
+) {
+    if let Ok((mut transform, mut ball)) = query.single_mut() {
+        // reset scores to 0
+        scoreboard.player1 = 0;
+        scoreboard.player2 = 0;
+
+        // reset ball position to 0.0
+        transform.translation.x = 0.0;
+        transform.translation.y = 0.0;
+
+
+        // randomize ball velocity serving towards player2
+        let mut rng = thread_rng();
+        let ball_x = rng.gen_range(BALL_INITIAL_X_MIN..BALL_INITIAL_X_MAX);
+        let ball_y = rng.gen_range(BALL_INITIAL_Y_MIN..BALL_INITIAL_Y_MAX);
+
+        ball.velocity.x = ball_x;
+        ball.velocity.y = ball_y;
+    }
+
+
+}
+
+fn enter_serve_state(
+    mut query: Query<(&mut Transform, &mut Ball)>,
+    server: Res<Server>    
+) {
     if let Ok((mut transform, mut ball)) = query.single_mut() {
         // reset ball position to 0.0
         transform.translation.x = 0.0;
         transform.translation.y = 0.0;
 
-        // randomize ball velocity
+        let mut serve = 1.0;
+
+        match server.0 {
+            Player::Player2 => serve = -1.0,
+            _ => (),
+        }
+
+
+        // randomize ball velocity with relation to server
         let mut rng = thread_rng();
-        let ball_x = rng.gen_range(BALL_INITIAL_X_MIN..BALL_INITIAL_X_MAX);
+        let ball_x = serve * rng.gen_range(BALL_INITIAL_X_MIN..BALL_INITIAL_X_MAX);
         let ball_y = rng.gen_range(BALL_INITIAL_Y_MIN..BALL_INITIAL_Y_MAX);
 
         ball.velocity.x = ball_x;
@@ -86,8 +125,9 @@ fn change_state_using_enter_key(
     if keys.just_pressed(KeyCode::Return) {
 
         match app_state.current() {
-            AppState::Play => app_state.set(AppState::Start).unwrap(),
-            AppState::Start => app_state.set(AppState::Play).unwrap(),
+            AppState::Play => (),
+            AppState::Start => app_state.set(AppState::Serve).unwrap(),
+            AppState::Serve => app_state.set(AppState::Play).unwrap()
         }
     }
 }
