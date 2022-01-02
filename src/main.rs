@@ -13,7 +13,7 @@ enum AppState {
     Start,
 }
 
-enum Player {
+pub enum Player {
     Player1,
     Player2,
 }

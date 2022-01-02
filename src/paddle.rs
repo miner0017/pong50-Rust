@@ -3,14 +3,14 @@ use bevy::prelude::*;
 use crate::Player;
 
 const PADDLE_SPEED: f32 = 500.0;
-const PADDLE_SCALE_X: f32 = 20.0;
-const PADDLE_SCALE_Y: f32 = 100.0;
+pub const PADDLE_SCALE_X: f32 = 20.0;
+pub const PADDLE_SCALE_Y: f32 = 100.0;
 
 
 pub struct PaddlePlugin;
 
-struct Paddle {
-    player: Player,
+pub struct Paddle {
+    pub player: Player,
 }
 
 impl Plugin for PaddlePlugin {
